@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');   // tambahkan di antara require lainnya
 const express = require('express');
 const app = express();
 
@@ -148,11 +149,12 @@ app.use((req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`Server berjalan di http://localhost:${PORT}`);
-    });
-}
-
-module.exports = app;
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('Terhubung ke MongoDB');
+    app.listen(PORT, () => console.log(`Server berjalan di http://localhost:${PORT}`));
+  })
+  .catch((err) => {
+    console.error('Gagal terhubung:', err.message);
+    process.exit(1);
+  });

@@ -20,11 +20,10 @@
   },
   "homepage": "https://github.com/kurniawan2428240159-lang/tugas1-restful-2428240159_Kurniawan#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^9.11.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
   }
 }
-
-
