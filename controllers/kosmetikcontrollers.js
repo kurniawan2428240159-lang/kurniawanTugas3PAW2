@@ -11,12 +11,12 @@ exports.create = async (req, res) => {
 };
 
 exports.getAll = async (req, res) => {
-  const data = await Kosmetik.find();
+  const data = await Mahasiswa.find().populate('prodiId');
   res.json(data);
 };
 
 exports.getById = async (req, res) => {
-  const data = await Kosmetik.findById(req.params.id);
+  const data = await Mahasiswa.findById(req.params.id).populate('prodiId');
   if (!data) throw errorHttp(404, 'Data tidak ditemukan');
   res.json(data);
 };

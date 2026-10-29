@@ -1,160 +1,36 @@
-const mongoose = require('mongoose');   // tambahkan di antara require lainnya
+require('dotenv').config();
+
 const express = require('express');
+const cors = require('cors');
+
+const logger = require('./middlewares/logger');
+const { notFoundHandler, errorHandler } = require('./middlewares/errorHandler');
+
+const kosmetikRoutes = require('./routes/kosmetikRoutes');
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
+// ---------- Middleware global ----------
+app.use(logger);
+app.use(cors({
+  origin: process.env.CORS_ORIGIN,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
 app.use(express.json());
-let skincareProducts = [
-    { id: 1, nama: "Gel Pembersih Wajah", merek: "Kulitku", jenisKulit: "berminyak", harga: 49000, nomorBpom: "NA18260100123" },
-    { id: 2, nama: "Moisturizer Gel", merek: "GlowUp", jenisKulit: "kering", harga: 75000, nomorBpom: "NA18260100124" },
-    { id: 3, nama: "Sunscreen SPF 50", merek: "SunProtect", jenisKulit: "normal", harga: 60000, nomorBpom: "NA18260100125" }
-];
-let nextId = 4;
 
+// ---------- Route dasar ----------
 app.get('/', (req, res) => {
-    res.json({
-        nama: "Kurniawan",
-        nim: "2428240159",
-        topik: "Kosmetik - Produk Skincare",
-        endpoints: [
-            "GET /skincare-products",
-            "GET /skincare-products/:id",
-            "POST /skincare-products",
-            "PUT /skincare-products/:id",
-            "DELETE /skincare-products/:id"]
-    });
+  res.send('Server Express.js berjalan!');
 });
 
-app.get('/skincare-products', (req, res) => {
-    let { jenisKulit, nama } = req.query;
-    let hasil = skincareProducts;
-    if (jenisKulit) {
-        hasil = hasil.filter(p => p.jenisKulit.toLowerCase() === jenisKulit.toLowerCase());
-    }
-    if (nama) {
-        hasil = hasil.filter(p => p.nama.toLowerCase().includes(nama.toLowerCase()));
-    }
+// ---------- Route per modul ----------
+app.use('/mahasiswa', kosmetikRoutes);
 
-    res.status(200).json({
-        status: "success",
-        message: "Data produk skincare berhasil diambil",
-        data: hasil
-    });
+// ---------- Handler 404 dan error handler (paling bawah) ----------
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+app.listen(PORT, () => {
+  console.log(`Server berjalan di http://localhost:${PORT}`);
 });
-
-app.get('/skincare-products/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const product = skincareProducts.find(p => p.id === id);
-    if (!product) {
-        return res.status(404).json({
-            status: "error",
-            message: `Data dengan id ${id} tidak ditemukan`,
-            data: null
-        });
-    }
-    res.json(product);
-});
-
-app.post('/skincare-products', (req, res) => {
-    const { nama, merek, jenisKulit, harga, nomorBpom } = req.body;
-    if (!nama || !merek || !jenisKulit || !harga || !nomorBpom) {
-        return res.status(400).json({
-            status: "error",
-            message: "Field nama, merek, jenisKulit, harga, dan nomorBpom wajib diisi",
-            data: null
-        });
-    }
-    const baru = { id: nextId++, nama, merek, jenisKulit, harga, nomorBpom };
-    skincareProducts.push(baru);
-
-    res.status(201).json({
-        status: "success",
-        message: "Data berhasil ditambahkan",
-        data: baru
-    });
-});
-
-
-app.get('/skincare-products/stats', (req, res) => {
-    const totalProduk = skincareProducts.length;
-    const totalHarga = skincareProducts.reduce((acc, p) => acc + p.harga, 0);
-    const rataRataHarga = totalProduk > 0 ? totalHarga / totalProduk : 0;
-    const perJenisKulit = {
-        normal: skincareProducts.filter(p => p.jenisKulit === 'normal').length,
-        kering: skincareProducts.filter(p => p.jenisKulit === 'kering').length,
-        berminyak: skincareProducts.filter(p => p.jenisKulit === 'berminyak').length,
-        sensitif: skincareProducts.filter(p => p.jenisKulit === 'sensitif').length
-    };
-
-    res.status(200).json({
-        status: "success",
-        message: "Statistik data produk berhasil didapatkan",
-        data: {
-            totalProduk,
-            rataRataHarga,
-            perJenisKulit
-        }
-    });
-});
-
-app.delete('/skincare-products/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const index = skincareProducts.findIndex(p => p.id === id);
-    if (index === -1) {
-        return res.status(404).json({
-            status: "error",
-            message: `Data dengan id ${id} tidak ditemukan`,
-            data: null
-        });
-    }
-    skincareProducts.splice(index, 1);
-    res.status(200).json({
-        status: "success",
-        message: `Data skincare dengan id ${id} berhasil dihapus`,
-        data: null
-    });
-});
-
-app.put('/skincare-products/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const index = skincareProducts.findIndex(p => p.id === id);
-    if (index === -1) {
-        return res.status(404).json({
-            status: "error",
-            message: `Data dengan id ${id} tidak ditemukan`,
-            data: null
-        });
-    }
-
-    const { nama, merek, jenisKulit, harga, nomorBpom } = req.body;
-    skincareProducts[index] = {
-        ...skincareProducts[index],
-        nama: nama || skincareProducts[index].nama,
-        merek: merek || skincareProducts[index].merek,
-        jenisKulit: jenisKulit || skincareProducts[index].jenisKulit,
-        harga: harga || skincareProducts[index].harga,
-        nomorBpom: nomorBpom || skincareProducts[index].nomorBpom
-    };
-    res.status(200).json({
-        status: "success",
-        message: `Data skincare dengan id ${id} berhasil diperbarui`,
-        data: skincareProducts[index]
-    });
-});
-
-app.use((req, res) => {
-    res.status(404).json({
-        status: "error",
-        message: "Endpoint tidak ditemukan",
-        data: null
-    });
-});
-
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('Terhubung ke MongoDB');
-    app.listen(PORT, () => console.log(`Server berjalan di http://localhost:${PORT}`));
-  })
-  .catch((err) => {
-    console.error('Gagal terhubung:', err.message);
-    process.exit(1);
-  });
