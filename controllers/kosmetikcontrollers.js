@@ -1,4 +1,4 @@
-const kosmetik = require('../models/mahasiswaModel');
+const Kosmetik = require('../models/kosmetikModel');
 const { errorHttp } = require('../middlewares/errorHandler');
 
 exports.create = async (req, res) => {
@@ -11,12 +11,12 @@ exports.create = async (req, res) => {
 };
 
 exports.getAll = async (req, res) => {
-  const data = await Mahasiswa.find().populate('prodiId');
+  const data = await Kosmetik.find().populate('merekId');
   res.json(data);
 };
 
 exports.getById = async (req, res) => {
-  const data = await Mahasiswa.findById(req.params.id).populate('prodiId');
+  const data = await Kosmetik.findById(req.params.id).populate('merekId');
   if (!data) throw errorHttp(404, 'Data tidak ditemukan');
   res.json(data);
 };

@@ -13,7 +13,7 @@ const kosmetikSchema = new mongoose.Schema({
   harga: { type: Number, required: [true, 'harga wajib diisi'], min: [0, 'harga tidak boleh negatif'] },
   nomorBpom: { type: String, required: [true, 'nomor BPOM wajib diisi'], unique: true, trim: true },
   spesifikasi: spesifikasiSchema,
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now }, 
 });
 
-module.exports = mongoose.model('Kosmetik', kosmetikSchema);  
+module.exports = mongoose.model('Kosmetik', kosmetikSchema);

@@ -1,8 +1,8 @@
-const merek = require('../models/merekModel');
+const Merek = require('../models/merekModel');
 
 exports.create = async (req, res) => {
   try {
-    const merek = await merek.create(req.body);
+    const merek = await Merek.create(req.body);
     res.status(201).json(merek);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -10,5 +10,5 @@ exports.create = async (req, res) => {
 };
 
 exports.getAll = async (req, res) => {
-  res.json(await merek.find());
+  res.json(await Merek.find());
 };
